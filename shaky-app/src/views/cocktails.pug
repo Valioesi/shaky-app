@@ -1,0 +1,33 @@
+extends layout
+
+block content  
+  br
+  if query
+    h5="Searching for " + query   
+  br 
+  if cocktails.length > 0       
+    ul.collection.with-header
+      li.collection-header
+        h4=title
+          span(data-badge-caption=cocktails.length class="badge new indigo lighten-2")
+      each cocktail in cocktails
+        li.collection-item
+          div #{cocktail.name}
+            a.secondary-content(href="/cocktails/" + cocktail._id)
+              i.material-icons.indigo-text.lighten-4 send
+  else
+    h4= title
+    p= text
+    br
+    if otherCocktails && otherCocktails.length > 0
+      each alternative in otherCocktails
+        ul.collection.with-header
+          li.collection-header
+            h5="All except " + alternative.without
+              span(data-badge-caption=alternative.cocktails.length class="badge new indigo lighten-2")
+          each cocktail in alternative.cocktails
+            li.collection-item
+              div #{cocktail.name}
+                a.secondary-content(href="/cocktails/" + cocktail._id)
+                  i.material-icons.indigo-text.lighten-4 send
+        

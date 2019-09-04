@@ -1,0 +1,23 @@
+div.cocktail-list
+  .section
+    h4.indigo-text.lighten-2.center-align.margin-bottom-15 #{cocktail.name}
+    
+    p.flow-text
+      b Description: 
+      if cocktail.description
+        span #{cocktail.description}
+      else
+        span No description found.
+    
+    p.flow-text
+      b Ingredients:
+      table.striped
+        thead
+          tr
+            th Name
+            th Amount
+        tbody
+          each ingredient in cocktail.ingredients
+            tr
+              td #{ingredient.name}
+              td #{ingredient.amount} #{ingredient.unit}

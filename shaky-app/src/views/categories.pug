@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  if categories.length > 0       
+    ul.collection.with-header
+      li.collection-header
+        h4=title
+          span(data-badge-caption=categories.length class="badge new indigo lighten-2")
+      each category in categories
+        li.collection-item
+          div #{category}
+            a.secondary-content(href="/categories/" + category)
+              i.material-icons.indigo-text.lighten-4 send

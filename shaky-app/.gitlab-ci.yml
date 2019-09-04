@@ -1,0 +1,96 @@
+image: node
+
+cache:
+  paths:
+   - node_modules/
+
+services:
+    - mongo
+
+variables:
+  NODE_ENV: 'gitlab'
+
+stages:
+    - build
+    - test
+    - staging
+    - deploy
+
+build: 
+    stage: build
+    script: npm install
+
+run_linting:
+    stage: test
+    script: npm run lint
+    artifacts:
+      paths:
+        - build/reports/linting-results/
+
+run_tests:
+    stage: test
+    script: npm run test
+    artifacts:
+      paths:
+        - build/reports/test-results/
+        
+pages:
+    stage: staging
+    dependencies:
+        - run_linting
+        - run_tests
+    script:
+        - echo "Publish test results"
+        - mkdir public
+        - mv build/reports/linting-results/* public
+        - mv build/reports/test-results/* public
+    artifacts:
+        paths:
+            - public
+
+deploy_staging:
+  stage: staging
+  before_script:
+    # Install ssh-agent if not already installed, it is required by Docker.
+    # (change apt-get to yum if you use a CentOS-based image)
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    # Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+
+    # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+    - apt-get update -y
+    - apt-get -y install rsync
+  script:
+    - echo "Deploy to production server"
+    - ssh deploy@159.89.16.223 "cd /home/deploy/shaky-app && git pull && npm install && sudo systemctl restart shaky.service"
+  only:
+    - master
+
+deploy_production:
+  stage: deploy
+  when: manual
+  before_script:
+    # Install ssh-agent if not already installed, it is required by Docker.
+    # (change apt-get to yum if you use a CentOS-based image)
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    # Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+
+    # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+    - apt-get update -y
+    - apt-get -y install rsync
+  script:
+    - echo "Deploy to production server"
+    - ssh deploy@159.89.96.208 "cd /home/deploy/shaky-app && git pull && npm install && sudo systemctl restart shaky.service"

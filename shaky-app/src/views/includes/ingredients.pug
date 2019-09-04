@@ -1,0 +1,18 @@
+.row
+  .col.s12
+    h4 Select ingredients
+    
+    p.flow-text.margin-bottom-15 You want to know what awesome cocktails you can make with ingredients you already have at home? Go ahead and choose all the ingredients you can find.
+
+  .col.s12
+    input(type='text', id='searchInput', placeholder='Search for names..')
+    form(method="GET", action='cocktails/search', id="ingredientForm")
+      div.ingredient-list.margin-bottom-15
+        each ingr, index in ingredients
+          p
+            input(type='checkbox' id='ingr-'+index class="filled-in" value=ingr name='ingredients[]')
+            label(for='ingr-'+index) #{ingr}
+
+      button(type="submit" class="btn right #7986cb indigo lighten-2" value="submit") Find cocktails
+      a(class='btn right margin-right-15 #7986cb indigo lighten-4', onClick='shaky.clearSelection()') clear
+          
